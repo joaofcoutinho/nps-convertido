@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, neonConfig } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
@@ -10,7 +10,13 @@ if (!databaseUrl) {
   );
 }
 
-const sql = neon(databaseUrl);
+// Next.js 14 cacheia chamadas fetch() server-side por padrão. O cliente HTTP do
+// Neon usa fetch internamente — sem isso, queries idênticas retornavam dados
+// frozen do primeiro hit. Forçamos no-store em todas as chamadas.
+neonConfig.fetchConnectionCache = true;
+const sql = neon(databaseUrl, {
+  fetchOptions: { cache: "no-store" },
+});
 
 export const db = drizzle(sql, { schema });
 export { schema };

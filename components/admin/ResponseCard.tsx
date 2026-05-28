@@ -73,6 +73,7 @@ export function ResponseCard({ row, index, onDelete }: ResponseCardProps) {
 
   const badge = badgeFor(row.scoreNps);
   const npsColor = colorForScore(row.scoreNps);
+  const initial = (row.clientName.trim().charAt(0) || "?").toUpperCase();
 
   return (
     <motion.li
@@ -89,12 +90,17 @@ export function ResponseCard({ row, index, onDelete }: ResponseCardProps) {
         className="w-full text-left px-5 sm:px-6 py-5 hover:bg-white/[0.015] transition-colors flex items-center gap-4"
         aria-expanded={open}
       >
-        {/* Score circle */}
+        {/* Avatar — inicial do cliente */}
         <span
-          className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-full font-sans text-2xl font-semibold tabular-nums"
-          style={{ backgroundColor: `${npsColor}22`, color: npsColor, border: `1px solid ${npsColor}55` }}
+          aria-hidden
+          className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-full font-sans text-lg font-semibold uppercase"
+          style={{
+            backgroundColor: `${npsColor}22`,
+            color: npsColor,
+            border: `1px solid ${npsColor}55`,
+          }}
         >
-          {row.scoreNps}
+          {initial}
         </span>
 
         <div className="min-w-0 flex-1">
@@ -103,10 +109,16 @@ export function ResponseCard({ row, index, onDelete }: ResponseCardProps) {
               {row.clientName}
             </span>
             <span
-              className="font-sans text-[10px] uppercase tracking-[0.18em] px-2 py-0.5 rounded-full"
+              className="inline-flex items-baseline gap-1.5 font-sans text-[10px] uppercase tracking-[0.18em] px-2 py-0.5 rounded-full"
               style={{ backgroundColor: badge.bg, color: badge.color }}
             >
               {badge.label}
+              <span
+                aria-hidden
+                className="w-px h-2.5 self-center opacity-40"
+                style={{ backgroundColor: badge.color }}
+              />
+              <span className="tabular-nums">{row.scoreNps}</span>
             </span>
           </div>
           <div className="mt-1 font-sans text-xs text-brand-muted">
