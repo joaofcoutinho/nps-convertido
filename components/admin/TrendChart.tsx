@@ -174,8 +174,8 @@ export function TrendChart({ points }: TrendChartProps) {
                   fill="#6B5A82"
                   fontFamily="var(--font-dm-sans), sans-serif"
                   textAnchor="end"
-                  fontVariantNumeric="tabular-nums"
                   letterSpacing="0.05em"
+                  style={{ fontVariantNumeric: "tabular-nums" }}
                 >
                   {tick > 0 ? `+${tick}` : tick}
                 </text>
@@ -367,7 +367,7 @@ function Tooltip({ x, y, point }: { x: number; y: number; point: TrendPoint }) {
           fill="#F4EEFB"
           fontFamily="var(--font-dm-sans), sans-serif"
           textAnchor={align === "end" ? "end" : align === "start" ? "start" : "middle"}
-          fontVariantNumeric="tabular-nums"
+          style={{ fontVariantNumeric: "tabular-nums" }}
         >
           {fmtShort(point.date)} · {point.nps > 0 ? "+" : ""}
           {point.nps}

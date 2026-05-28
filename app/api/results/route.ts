@@ -84,16 +84,16 @@ export async function GET(request: Request) {
     );
 
     const whereSql = periodFilter ? sql` WHERE created_at >= ${since}` : sql``;
-    const aggregateResult = (await db.execute(
+    const rawResult: unknown = await db.execute(
       sql`SELECT COUNT(*)::int AS total, ${colsSql} FROM nps_responses${whereSql}`
-    )) as unknown as { rows?: Record<string, number | null>[] } & Array<
-      Record<string, number | null>
-    >;
+    );
 
-    // drizzle-orm/neon-http retorna o resultado como array direto (não { rows: [] })
-    const aggregate: Record<string, number | null> = Array.isArray(aggregateResult)
-      ? aggregateResult[0] ?? {}
-      : aggregateResult.rows?.[0] ?? {};
+    // drizzle-orm/neon-http retorna array direto; outros adapters expõem .rows.
+    const aggregateRows: Record<string, number | null>[] = Array.isArray(rawResult)
+      ? (rawResult as Record<string, number | null>[])
+      : ((rawResult as { rows?: Record<string, number | null>[] }).rows ?? []);
+
+    const aggregate: Record<string, number | null> = aggregateRows[0] ?? {};
 
     const totalInPeriod = Number(aggregate.total ?? 0);
 
