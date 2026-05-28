@@ -253,7 +253,7 @@ function AreaRow({ label, score }: { label: string; score: number | null }) {
       <Dots score={filled} color={color} hasData={score != null} />
       <span
         className="font-sans text-sm font-semibold tabular-nums w-6 text-right"
-        style={{ color: score == null ? "#6B5A82" : color }}
+        style={{ color: score == null ? "#9B8AB4" : color }}
       >
         {score == null ? "—" : score}
       </span>

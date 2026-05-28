@@ -22,7 +22,11 @@ const Y_TICKS = [-100, -50, 0, 50, 100];
 function fmtShort(iso: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    const month = d
+      .toLocaleDateString("pt-BR", { month: "short" })
+      .replace(".", "");
+    const year = d.getFullYear().toString().slice(-2);
+    return `${month}/${year}`;
   } catch {
     return iso;
   }
@@ -31,7 +35,6 @@ function fmtShort(iso: string): string {
 function fmtLong(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString("pt-BR", {
-      day: "2-digit",
       month: "long",
       year: "numeric",
     });
@@ -121,7 +124,7 @@ export function TrendChart({ points }: TrendChartProps) {
   return (
     <Frame
       title="Evolução do NPS"
-      subtitle="Variação semanal do score (escala −100 a +100)"
+      subtitle="Variação mensal do score (escala −100 a +100)"
       meta={
         <div className="flex items-baseline gap-2">
           <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-brand-muted">
@@ -171,7 +174,7 @@ export function TrendChart({ points }: TrendChartProps) {
                   x={PAD_L - 10}
                   y={y + 3}
                   fontSize="10"
-                  fill="#6B5A82"
+                  fill="#9B8AB4"
                   fontFamily="var(--font-dm-sans), sans-serif"
                   textAnchor="end"
                   letterSpacing="0.05em"
@@ -282,7 +285,7 @@ export function TrendChart({ points }: TrendChartProps) {
           {/* X-axis labels — start, middle, end */}
           <g
             fontSize="10"
-            fill="#6B5A82"
+            fill="#9B8AB4"
             fontFamily="var(--font-dm-sans), sans-serif"
             letterSpacing="0.05em"
           >
@@ -319,8 +322,8 @@ export function TrendChart({ points }: TrendChartProps) {
         {points.length === 1 && (
           <div className="mt-4 pt-4 border-t border-brand-border flex flex-wrap items-baseline justify-between gap-3">
             <span className="font-sans text-xs text-brand-muted">
-              Apenas uma semana com respostas até agora — a curva começa a desenhar a
-              partir da segunda semana.
+              Apenas um mês com respostas até agora — a curva começa a desenhar a
+              partir do segundo mês.
             </span>
             <span className="font-sans text-xs text-brand-muted">
               {fmtLong(last.p.date)} · {last.p.total}{" "}

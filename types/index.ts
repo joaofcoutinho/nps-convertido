@@ -68,7 +68,7 @@ export interface ResultsPayload {
   averages: AreaAverage[];
   nps: NpsBreakdown;
   trend: {
-    bucket: "week";
+    bucket: "month";
     points: TrendPoint[];
   };
   responses: {

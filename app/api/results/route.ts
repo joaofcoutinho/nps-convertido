@@ -116,10 +116,10 @@ export async function GET(request: Request) {
 
     const nps = computeNps(npsScores.map((r) => r.score));
 
-    /* ---- Série temporal: NPS por semana ---- */
+    /* ---- Série temporal: NPS por mês ---- */
     const trendBase = db
       .select({
-        bucket: sql<Date | string>`DATE_TRUNC('week', ${npsResponses.createdAt})`,
+        bucket: sql<Date | string>`DATE_TRUNC('month', ${npsResponses.createdAt})`,
         total: sql<number>`COUNT(*)::int`,
         promoters: sql<number>`COUNT(*) FILTER (WHERE ${npsResponses.scoreNps} >= 4)::int`,
         detractors: sql<number>`COUNT(*) FILTER (WHERE ${npsResponses.scoreNps} <= 2)::int`,
@@ -127,8 +127,8 @@ export async function GET(request: Request) {
       .from(npsResponses);
 
     const trendRows = (await (periodFilter ? trendBase.where(periodFilter) : trendBase)
-      .groupBy(sql`DATE_TRUNC('week', ${npsResponses.createdAt})`)
-      .orderBy(sql`DATE_TRUNC('week', ${npsResponses.createdAt}) ASC`)) as {
+      .groupBy(sql`DATE_TRUNC('month', ${npsResponses.createdAt})`)
+      .orderBy(sql`DATE_TRUNC('month', ${npsResponses.createdAt}) ASC`)) as {
       bucket: Date | string;
       total: number;
       promoters: number;
@@ -136,7 +136,7 @@ export async function GET(request: Request) {
     }[];
 
     const trend = {
-      bucket: "week" as const,
+      bucket: "month" as const,
       points: trendRows.map((r) => {
         const total = Number(r.total);
         const promoters = Number(r.promoters);
