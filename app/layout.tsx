@@ -17,7 +17,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Convertido — Pesquisa de Satisfação",
+  title: "Convertido | Pesquisa de Satisfação",
   description:
     "Sua avaliação nos ajuda a entregar resultados cada vez melhores. Leva menos de 3 minutos.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),

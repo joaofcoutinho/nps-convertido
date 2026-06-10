@@ -11,6 +11,7 @@ import { AREAS } from "@/lib/areas";
 import type { AreaKey } from "@/types";
 
 type Scores = Partial<Record<AreaKey, number>>;
+type Skipped = Partial<Record<AreaKey, boolean>>;
 
 interface IdentityState {
   client_name: string;
@@ -31,6 +32,7 @@ export function SurveyClient() {
     company: "",
   });
   const [scores, setScores] = useState<Scores>({});
+  const [skipped, setSkipped] = useState<Skipped>({});
   const [comentario, setComentario] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -44,10 +46,13 @@ export function SurveyClient() {
   const canProceed = useMemo(() => {
     if (step === 0) return identity.client_name.trim().length >= 2;
     if (step >= 1 && step <= 10) {
-      return currentArea ? typeof scores[currentArea.key] === "number" : false;
+      if (!currentArea) return false;
+      const hasScore = typeof scores[currentArea.key] === "number";
+      const isSkipped = !!skipped[currentArea.key];
+      return hasScore || isSkipped;
     }
     return true; // comment step is optional
-  }, [step, identity.client_name, scores, currentArea]);
+  }, [step, identity.client_name, scores, skipped, currentArea]);
 
   function go(next: number) {
     setSubmitError(null);
@@ -156,8 +161,28 @@ export function SurveyClient() {
                   index={step}
                   area={currentArea}
                   value={scores[currentArea.key] ?? null}
-                  onChange={(v) =>
-                    setScores((prev) => ({ ...prev, [currentArea.key]: v }))
+                  isSkipped={!!skipped[currentArea.key]}
+                  onChange={(v) => {
+                    setScores((prev) => ({ ...prev, [currentArea.key]: v }));
+                    setSkipped((prev) => ({ ...prev, [currentArea.key]: false }));
+                  }}
+                  onToggleSkip={
+                    currentArea.key === "nps"
+                      ? undefined
+                      : () => {
+                          const nowSkipped = !skipped[currentArea.key];
+                          setSkipped((prev) => ({
+                            ...prev,
+                            [currentArea.key]: nowSkipped,
+                          }));
+                          if (nowSkipped) {
+                            setScores((prev) => {
+                              const next = { ...prev };
+                              delete next[currentArea.key];
+                              return next;
+                            });
+                          }
+                        }
                   }
                 />
               )}
@@ -279,12 +304,16 @@ function QuestionStep({
   index,
   area,
   value,
+  isSkipped,
   onChange,
+  onToggleSkip,
 }: {
   index: number;
   area: (typeof AREAS)[number];
   value: number | null;
+  isSkipped: boolean;
   onChange: (n: number) => void;
+  onToggleSkip?: () => void;
 }) {
   return (
     <div>
@@ -310,7 +339,57 @@ function QuestionStep({
       )}
 
       <div className="mt-10">
-        <ScoreSelector value={value} onChange={onChange} />
+        <div
+          className={`transition-opacity ${
+            isSkipped ? "opacity-30 pointer-events-none select-none" : "opacity-100"
+          }`}
+          aria-hidden={isSkipped}
+        >
+          <ScoreSelector value={value} onChange={onChange} />
+        </div>
+
+        {onToggleSkip && (
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={onToggleSkip}
+              aria-pressed={isSkipped}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-sans text-xs uppercase tracking-[0.18em] border transition-all ${
+                isSkipped
+                  ? "bg-brand-primary/15 border-brand-primary text-brand-light"
+                  : "border-brand-border text-brand-muted hover:text-brand-light hover:border-brand-muted"
+              }`}
+            >
+              <span
+                aria-hidden
+                className={`inline-flex items-center justify-center w-4 h-4 rounded-sm border ${
+                  isSkipped ? "bg-brand-primary border-brand-primary" : "border-brand-muted/60"
+                }`}
+              >
+                {isSkipped && (
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </span>
+              Não contratei este serviço
+            </button>
+            {isSkipped && (
+              <span className="font-sans text-xs text-brand-muted">
+                Esta área não será considerada na sua avaliação.
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
